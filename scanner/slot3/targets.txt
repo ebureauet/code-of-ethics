@@ -1,1 +1,1 @@
-{"alive": 0.967, "family": "top24", "sampled": 30}
+{"alive": 1.0, "family": "top24", "sampled": 30}
