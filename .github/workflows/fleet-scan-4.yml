@@ -1,0 +1,32 @@
+name: fleet-scan-4
+on:
+  push:
+    paths: ['.github/workflows/fleet-scan-4.yml']
+  workflow_dispatch:
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: pip install --quiet aiohttp jsmin requests aiodns
+      - name: scan
+        run: |
+          echo "runner: $(nproc) vCPU / $(free -m | awk '/Mem:/{print $2}') MB"
+          cd scanner/slot4
+          python3 ../batch_output.py --list targets.txt --js ../fast_recon.js             --output out --concurrency 100 --timeout 5 2>&1 | tail -30
+      - name: collect
+        if: always()
+        run: |
+          mkdir -p results
+          cp -r scanner/slot4/out_* results/ 2>/dev/null || true
+          cp -r out_* results/ 2>/dev/null || true
+          find results -type f | wc -l
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scan-results-4
+          path: results/
+          retention-days: 1
+# nonce 1795698432.7725387
